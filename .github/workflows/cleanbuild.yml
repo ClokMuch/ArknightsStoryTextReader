@@ -1,0 +1,46 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: ASTR Webpage Builder
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch: # This allows the workflow to be manually triggered from the GitHub UI
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      VITE_BASE: /ArknightsStoryTextReader/
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4.0.3
+      with:
+        node-version: '22.14.0'
+
+    - name: Install dependencies and build
+      run: |
+        cd reader
+        npm ci
+        npm run build
+        echo "Build Completed!"
+        # The build output is expected to be in ./reader/dist
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: astr-webpage-build
+        path: reader/dist/ # Path to the directory containing your built files
+        retention-days: 5 # How long to keep the artifact (optional)
+
+    - name: Build process finished
+      run: echo "Artifact generated and build process completed!"
